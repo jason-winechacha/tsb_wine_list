@@ -17,25 +17,18 @@ class _FilterComponentState extends State<FilterComponent> {
   @override
   Widget build(BuildContext context) {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        const SizedBox(
-          height: 10,
-        ),
-        Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: 20,
-          ),
-          child: Text(
-            '가격범위 : ${NumberFormat.currency(locale: 'ko_KR', symbol: '₩').format(_selectedRange.start)} ~ ${NumberFormat.currency(locale: 'ko_KR', symbol: '₩').format(_selectedRange.end)}',
-            style: const TextStyle(fontSize: 18),
-          ),
-        ),
         RangeSlider(
           values: _selectedRange,
           min: _minPrice,
           max: _maxPrice,
           divisions: 20,
+          labels: RangeLabels(
+              NumberFormat.currency(locale: 'ko_KR', symbol: '₩')
+                  .format(_selectedRange.start),
+              NumberFormat.currency(locale: 'ko_KR', symbol: '₩')
+                  .format(_selectedRange.end)),
           onChanged: (RangeValues values) {
             setState(() {
               _selectedRange = values;

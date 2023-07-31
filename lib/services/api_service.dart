@@ -22,6 +22,22 @@ class ApiService {
     throw Error();
   }
 
+  static Future<AlcoholModel> getAlcoholById(int id) async {
+    final url = Uri.parse(baseUrl);
+    final response = await http.get(url);
+    if (response.statusCode == 200) {
+      final alcohols = jsonDecode(response.body)["alcohols"];
+      for (var alcohol in alcohols) {
+        final item = AlcoholModel.fromJson(alcohol);
+        if (item.id == id) {
+          return item;
+        }
+      }
+      return AlcoholModel.fromJson({"id": id});
+    }
+    throw Error();
+  }
+
   static Future<List<AlcoholModel>> searchAlcoholList(String keyword) async {
     List<AlcoholModel> alcoholInstances = [];
     final url = Uri.parse('$baseUrl?search=$keyword');

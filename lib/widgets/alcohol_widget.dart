@@ -25,7 +25,7 @@ class _AlcoholState extends State<Alcohol> {
     return GestureDetector(
       onTap: () {
         Navigator.of(context)
-            .pushNamed('/wine', arguments: {"alcohol": widget.alcohol});
+            .pushNamed('/alcohol', arguments: {"alcohol": widget.alcohol});
       },
       onLongPress: () => copyToClipboard(widget.alcohol.nameKr),
       onTapDown: (details) {
@@ -84,7 +84,7 @@ class _AlcoholState extends State<Alcohol> {
                         widget.alcohol.name,
                         style: const TextStyle(
                           fontSize: 13,
-                          color: Colors.black,
+                          color: Colors.white,
                         ),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
@@ -98,9 +98,9 @@ class _AlcoholState extends State<Alcohol> {
                           0.25, // Set the desired width
                       child: Text(
                         widget.alcohol.nameKr,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 12,
-                          color: Colors.black54,
+                          color: Colors.grey.shade400,
                         ),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
@@ -113,7 +113,7 @@ class _AlcoholState extends State<Alcohol> {
                       .format(widget.alcohol.price),
                   style: const TextStyle(
                     fontSize: 13,
-                    color: Colors.black,
+                    color: Colors.white,
                   ),
                 ),
               ],

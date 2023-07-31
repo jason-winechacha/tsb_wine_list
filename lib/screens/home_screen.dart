@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:tsb_wine_list/models/alcohol_model.dart';
 import 'package:tsb_wine_list/services/api_service.dart';
 import 'package:tsb_wine_list/utils/logger.dart';
+import 'package:tsb_wine_list/widgets/bubble_row.dart';
 import 'package:tsb_wine_list/widgets/filter_component.dart';
-import 'package:tsb_wine_list/widgets/toggle_buttons.dart';
 import 'package:tsb_wine_list/widgets/alcohol_widget.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -15,22 +16,14 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   List<AlcoholModel> alcohols = [];
-  List<String> filters = [
-    "레드",
-    "화이트",
-    "스파클링",
-    "로제",
-    "내추럴",
-    "주정강화",
-    "샴페인",
-    "위스키"
-  ];
   double minRange = 0;
   double maxRange = 1500000;
   bool isLoading = true;
   late ScrollController _gridScrollController;
   bool _showTopButton = false;
   bool isAscending = false;
+  String selectedCategory = "전체";
+  String searchKeyword = "";
 
   @override
   void initState() {
@@ -72,14 +65,21 @@ class _HomeScreenState extends State<HomeScreen> {
     final data = await ApiService.searchAlcoholList(keyword);
     setState(() {
       alcohols = data;
+      searchKeyword = keyword;
     });
+    _searchController.text = "";
   }
 
-  void handleFilter(List<Map<String, dynamic>> selected) {
+  void _resetSearch() async {
+    String keyword = "";
+    final data = await ApiService.searchAlcoholList(keyword);
+
     setState(() {
-      filters = List<String>.from(
-          selected.map((elem) => (elem)['category']).toList());
+      alcohols = data;
+      searchKeyword = keyword;
     });
+
+    _searchController.text = "";
   }
 
   void handleRange(double min, double max) {
@@ -89,16 +89,30 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
+  void handleBubbleClick(String selected) {
+    setState(() {
+      selectedCategory = selected;
+    });
+  }
+
+  List<AlcoholModel> filterItemsByCategory(
+      List<AlcoholModel> itemList, String category) {
+    if (category.toLowerCase() == "전체") {
+      return itemList;
+    } else {
+      List<AlcoholModel> filteredItems =
+          itemList.where((item) => item.category == category).toList();
+      return filteredItems;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).primaryColor,
       appBar: AppBar(
-        elevation: 2,
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.blue,
         title: const Text(
-          "TSB 와인 리스트",
+          "TSB 상품 리스트",
           style: TextStyle(
             fontSize: 24,
           ),
@@ -113,26 +127,93 @@ class _HomeScreenState extends State<HomeScreen> {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     const SizedBox(
-                      height: 10,
+                      height: 20,
                     ),
+                    BubbleRow(callback: handleBubbleClick),
                     SizedBox(
-                      height: 50,
-                      child: MultipleToggleButtons(handleFilter: handleFilter),
-                    ),
-                    ElevatedButton(
-                        onPressed: switchPriceOrder,
-                        child: Text(isAscending ? "최저가순" : "최고가순")),
-                    SizedBox(
-                      height: 100,
                       child: FilterComponent(handleRange: handleRange),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 15,
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          (searchKeyword.isNotEmpty)
+                              ? Container(
+                                  padding: const EdgeInsets.all(
+                                    10,
+                                  ),
+                                  decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.circular(
+                                        30,
+                                      ),
+                                      border: Border.all(
+                                        color: Colors.black,
+                                      )),
+                                  child: Row(
+                                    children: [
+                                      Text(searchKeyword),
+                                      const SizedBox(
+                                        width: 5,
+                                      ),
+                                      GestureDetector(
+                                        onTap: _resetSearch,
+                                        child: const Icon(
+                                          FontAwesomeIcons.x, // 아이콘 코드
+                                          size: 13.0,
+                                        ),
+                                      )
+                                    ],
+                                  ))
+                              : Container(),
+                          ElevatedButton(
+                              onPressed: switchPriceOrder,
+                              style: ButtonStyle(
+                                backgroundColor: MaterialStatePropertyAll(
+                                  Colors.grey.shade200,
+                                ),
+                                foregroundColor: const MaterialStatePropertyAll(
+                                  Colors.black,
+                                ),
+                              ),
+                              child: Row(
+                                children: [
+                                  const Icon(
+                                    FontAwesomeIcons.list, // 아이콘 코드
+                                    size: 15.0,
+                                  ),
+                                  const SizedBox(
+                                    width: 5,
+                                  ),
+                                  const Text("가격순"),
+                                  const SizedBox(
+                                    width: 3,
+                                  ),
+                                  isAscending
+                                      ? const Icon(
+                                          FontAwesomeIcons.arrowUp, // 아이콘 코드
+                                          size: 15.0,
+                                        )
+                                      : const Icon(
+                                          FontAwesomeIcons.arrowDown, // 아이콘 코드
+                                          size: 15.0,
+                                        ),
+                                ],
+                              )),
+                        ],
+                      ),
                     ),
                     Expanded(
                       child: makeList(alcohols
-                          .where((data) => filters.contains(data.category))
+                          // .where((data) => filters.contains(data.category))
                           .where((data) =>
                               data.price >= minRange &&
                               data.price <= maxRange &&
-                              data.price != 0)
+                              data.price != 0 &&
+                              data.itemCd != "")
                           .toList()),
                     )
                   ],
@@ -176,6 +257,11 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                     actions: [
                       ElevatedButton(
+                        style: ButtonStyle(
+                          backgroundColor: MaterialStateProperty.all(
+                            Theme.of(context).colorScheme.secondary,
+                          ),
+                        ),
                         onPressed: () {
                           Navigator.of(context).pop();
                           _performSearch();
@@ -200,6 +286,8 @@ class _HomeScreenState extends State<HomeScreen> {
     } else {
       alcohols.sort((a, b) => b.price.compareTo(a.price));
     }
+
+    alcohols = filterItemsByCategory(alcohols, selectedCategory);
 
     return GridView.builder(
       itemCount: alcohols.length,

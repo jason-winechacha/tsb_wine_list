@@ -41,6 +41,7 @@ dependencies:
   intl: ^0.18.1
   logger: ^1.4.0
   fluttertoast: ^8.0.9
+  font_awesome_flutter: ^10.5.0
 
 dev_dependencies:
   flutter_test:

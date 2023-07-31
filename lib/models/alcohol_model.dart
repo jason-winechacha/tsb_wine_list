@@ -1,12 +1,27 @@
 class AlcoholModel {
-  final String name,
+  String name,
       nameKr,
       imageUrl,
       descriptionTap,
       category,
       country,
-      countryCode;
-  final int id, price, volume;
+      countryCode,
+      itemCd;
+  int id, price, volume;
+
+  AlcoholModel({
+    required this.name,
+    required this.nameKr,
+    required this.imageUrl,
+    required this.descriptionTap,
+    required this.category,
+    required this.country,
+    required this.countryCode,
+    required this.id,
+    required this.price,
+    required this.volume,
+    required this.itemCd,
+  });
 
   AlcoholModel.fromJson(Map<String, dynamic> json)
       : id = json['id'],
@@ -21,5 +36,21 @@ class AlcoholModel {
         price = json['price'],
         volume = json['volume'],
         country = json['country'] != null ? json['country']['name'] : "",
-        countryCode = json['country'] != null ? json['country']['code'] : "";
+        countryCode = json['country'] != null ? json['country']['code'] : "",
+        itemCd = json['itemCd'] ?? "";
+
+  void init() {
+    name = "";
+    nameKr = "";
+    imageUrl = "";
+    descriptionTap = "";
+    category = "";
+    country = "";
+    countryCode = "";
+    itemCd = "";
+
+    id = 0;
+    price = 0;
+    volume = 0;
+  }
 }

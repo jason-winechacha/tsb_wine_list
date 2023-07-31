@@ -7,8 +7,10 @@ import 'package:tsb_wine_list/services/api_service.dart';
 import 'package:tsb_wine_list/utils/logger.dart';
 
 class AlcoholDetail extends StatefulWidget {
+  // final int id;
   final AlcoholModel alcohol;
 
+  // const AlcoholDetail({required this.id, super.key});
   const AlcoholDetail({required this.alcohol, super.key});
 
   @override
@@ -16,10 +18,24 @@ class AlcoholDetail extends StatefulWidget {
 }
 
 class _AlcoholDetailState extends State<AlcoholDetail> {
+  // bool isLoading = true;
   String flagEmoji = '';
+  // AlcoholModel alcohol = AlcoholModel(
+  //   name: "",
+  //   nameKr: "",
+  //   imageUrl: "",
+  //   descriptionTap: "",
+  //   category: "",
+  //   country: "",
+  //   countryCode: "",
+  //   id: 0,
+  //   price: 0,
+  //   volume: 0,
+  // );
 
   @override
   void initState() {
+    // getAlcohol(widget.id);
     countryToEmoji(widget.alcohol.countryCode);
     super.initState();
   }
@@ -28,15 +44,13 @@ class _AlcoholDetailState extends State<AlcoholDetail> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        elevation: 2,
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.blue,
         title: Text(
           widget.alcohol.nameKr,
           style: const TextStyle(
             fontSize: 24,
           ),
         ),
+        foregroundColor: Theme.of(context).primaryColor,
       ),
       body: Stack(children: [
         Positioned(
@@ -69,7 +83,24 @@ class _AlcoholDetailState extends State<AlcoholDetail> {
                     // color: Colors.grey.shade400,
                     borderRadius: BorderRadius.circular(5),
                   ),
-                  child: Image.network(widget.alcohol.imageUrl),
+                  child: Image.network(
+                    widget.alcohol.imageUrl,
+                    loadingBuilder: (BuildContext context, Widget child,
+                        ImageChunkEvent? loadingProgress) {
+                      if (loadingProgress == null) {
+                        // The image has finished loading
+                        return child;
+                      } else {
+                        // The image is still loading
+                        return CircularProgressIndicator(
+                          value: loadingProgress.expectedTotalBytes != null
+                              ? loadingProgress.cumulativeBytesLoaded /
+                                  (loadingProgress.expectedTotalBytes ?? 1)
+                              : null,
+                        );
+                      }
+                    },
+                  ),
                 ),
               ),
               const SizedBox(height: 16),
@@ -162,4 +193,13 @@ class _AlcoholDetailState extends State<AlcoholDetail> {
       textColor: Colors.white,
     );
   }
+
+  // Future<void> getAlcohol(int id) async {
+  //   final item = await ApiService.getAlcoholById(id);
+  //   setState(() {
+  //     alcohol = item;
+  //     countryToEmoji(item.countryCode);
+  //     isLoading = false;
+  //   });
+  // }
 }
